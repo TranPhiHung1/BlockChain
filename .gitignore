@@ -11,3 +11,7 @@ Desktop.ini
 # Large PDF documents and images in this workspace
 *.pdf
 *.png
+
+# Ngoại lệ: logo trường là tài nguyên bắt buộc của trang web,
+# thiếu tệp này site sẽ vỡ ảnh khi triển khai.
+!web/public/assets/*.png

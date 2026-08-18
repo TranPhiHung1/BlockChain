@@ -18,9 +18,9 @@
      * ------------------------------------------------------------------- */
     github: {
       // Đường dẫn kho GitHub của đồ án
-      url: 'https://github.com/your-username/dlu-blockchain-lab',   // ← SỬA
+      url: 'https://github.com/tiennhathuynh/BlockChain',   // ← SỬA
       // Dòng lệnh hiển thị ở nút "Tải về bằng Git"
-      clone: 'git clone https://github.com/your-username/dlu-blockchain-lab.git' // ← SỬA
+      clone: 'git clone https://github.com/tiennhathuynh/BlockChain.git' // ← SỬA
     },
 
     /* ---------------------------------------------------------------------
@@ -49,7 +49,7 @@
         emoji: '🌲',
         role: { vi: 'Trưởng nhóm · Kiến trúc & Giao thức đồng thuận',
                 en: 'Team lead · Architecture & consensus protocols' },
-        email: 'nguyendangnhattien4@gmail.com',
+        email: '',   // ← điền email nếu muốn hiện công khai trên trang Giới thiệu
         github: ''
       },
       {
