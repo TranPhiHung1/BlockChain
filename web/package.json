@@ -1,0 +1,17 @@
+{
+  "name": "dlu-blockchain-lab",
+  "version": "1.0.0",
+  "description": "Công cụ trực quan hoá Danh sách liên kết, Khối & Chuỗi khối và Giao thức đồng thuận — đồ án môn Blockchain, Trường Đại học Đà Lạt.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["blockchain", "linked-list", "sha256", "proof-of-work", "consensus", "dalat-university"],
+  "author": "Khoa Công nghệ Thông tin — Trường Đại học Đà Lạt",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DLU Blockchain Lab — Trực quan hoá Chuỗi khối</title>
+  <meta name="description" content="Công cụ trực quan hoá Danh sách liên kết, Khối &amp; Chuỗi khối và Giao thức đồng thuận — đồ án môn Blockchain, Trường Đại học Đà Lạt.">
+  <meta name="author" content="Khoa Công nghệ Thông tin — Trường Đại học Đà Lạt">
+  <link rel="icon" href="assets/dlu-logo.png">
+
+  <!-- Phông chữ: nếu không có mạng, hệ thống tự lùi về font mặc định trong style.css -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===================== THANH ĐIỀU HƯỚNG ===================== -->
+  <header class="nav">
+    <nav class="nav-inner">
+      <a class="brand" href="#/">
+        <img src="assets/dlu-logo.png" alt="Logo Trường Đại học Đà Lạt">
+        <span class="brand-txt">
+          <b>DLU Blockchain Lab</b>
+          <span data-i18n="brand.sub">Trường Đại học Đà Lạt</span>
+        </span>
+      </a>
+
+      <div class="nav-links">
+        <a href="#/"            data-i18n="nav.home">Trang chủ</a>
+        <a href="#/linked-list" data-i18n="nav.ll">Danh sách liên kết</a>
+        <a href="#/blockchain"  data-i18n="nav.bc">Khối &amp; Chuỗi khối</a>
+        <a href="#/consensus"   data-i18n="nav.cs">Đồng thuận</a>
+        <a href="#/keys"        data-i18n="nav.ky">Khoá &amp; Chữ ký</a>
+        <a href="#/about"       data-i18n="nav.about">Giới thiệu</a>
+      </div>
+
+      <button class="icon-btn lang-btn" id="langBtn" aria-label="Language">🇬🇧 EN</button>
+      <button class="icon-btn" id="themeBtn" aria-label="Theme">☀️</button>
+      <button class="icon-btn burger" id="burger" aria-label="Menu">☰</button>
+    </nav>
+  </header>
+
+  <!-- ===================== NỘI DUNG TRANG ===================== -->
+  <main id="app"></main>
+
+  <!-- ===================== CHÂN TRANG ===================== -->
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="fbrand">
+        <img src="assets/dlu-logo.png" alt="Logo Trường Đại học Đà Lạt">
+        <div>
+          <p style="color:var(--text);font-weight:700">DLU Blockchain Lab</p>
+          <p data-i18n="footer.tagline">Đồ án môn Blockchain · Khoa Công nghệ Thông tin</p>
+          <p><a id="footerSource" href="#" target="_blank" rel="noopener"
+                class="footer-link" data-i18n="footer.source">Mã nguồn trên GitHub</a></p>
+        </div>
+      </div>
+      <p>© <span id="year">2026</span> <span data-i18n="footer.copy">Trường Đại học Đà Lạt — Dalat University.</span><br>
+         <span data-i18n="footer.note">Mọi phép băm SHA-256 đều được tính trực tiếp trên máy bạn.</span></p>
+    </div>
+  </footer>
+
+  <!-- ===================== MÃ NGUỒN =====================
+       Thứ tự nạp có ý nghĩa:
+         từ điển & cấu hình → thư viện → lõi thuật toán → giao diện → router.
+       Dùng script cổ điển (không phải ES module) để trang chạy được cả khi
+       mở trực tiếp bằng file:// mà không cần máy chủ web.                    -->
+  <script src="js/i18n.js"></script>
+  <script src="js/config.js"></script>
+
+  <script src="js/lib/sha256.js"></script>
+
+  <script src="js/core/linked-list.js"></script>
+  <script src="js/core/blockchain.js"></script>
+  <script src="js/core/consensus.js"></script>
+  <script src="js/core/ecdsa.js"></script>
+
+  <script src="js/ui/dom.js"></script>
+  <script src="js/ui/view-home.js"></script>
+  <script src="js/ui/view-linkedlist.js"></script>
+  <script src="js/ui/view-blockchain.js"></script>
+  <script src="js/ui/view-consensus.js"></script>
+  <script src="js/ui/view-keys.js"></script>
+  <script src="js/ui/view-about.js"></script>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

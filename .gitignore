@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Large PDF documents and images in this workspace
+*.pdf
+*.png
