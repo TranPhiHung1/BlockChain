@@ -59,7 +59,7 @@ http.createServer(function (req, res) {
   });
 }).listen(PORT, function () {
   console.log('');
-  console.log('  DLU Blockchain Lab  →  http://localhost:' + PORT);
+  console.log('  DLU Ledger Studio  →  http://localhost:' + PORT);
   console.log('  Thư mục gốc: ' + ROOT);
   console.log('  Nhấn Ctrl+C để dừng.');
   console.log('');

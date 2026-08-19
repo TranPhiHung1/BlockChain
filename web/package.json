@@ -1,13 +1,13 @@
 {
-  "name": "dlu-blockchain-lab",
-  "version": "1.0.0",
-  "description": "Công cụ trực quan hoá Danh sách liên kết, Khối & Chuỗi khối và Giao thức đồng thuận — đồ án môn Blockchain, Trường Đại học Đà Lạt.",
+  "name": "dlu-ledger-studio",
+  "version": "2.0.0",
+  "description": "Xưởng mô phỏng sổ cái phân tán: mắt xích dữ liệu, khối bất biến và giao dịch ký bằng ECDSA — bài tập lớn môn Blockchain, Trường Đại học Đà Lạt.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["blockchain", "linked-list", "sha256", "proof-of-work", "consensus", "dalat-university"],
+  "keywords": ["blockchain", "linked-list", "sha256", "ecdsa", "secp256k1", "digital-signature", "dalat-university"],
   "author": "Khoa Công nghệ Thông tin — Trường Đại học Đà Lạt",
   "license": "MIT",
   "engines": {

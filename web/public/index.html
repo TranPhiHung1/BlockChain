@@ -3,71 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DLU Blockchain Lab — Trực quan hoá Chuỗi khối</title>
-  <meta name="description" content="Công cụ trực quan hoá Danh sách liên kết, Khối &amp; Chuỗi khối và Giao thức đồng thuận — đồ án môn Blockchain, Trường Đại học Đà Lạt.">
+  <title>DLU Ledger Studio — Xưởng mô phỏng sổ cái phân tán</title>
+  <meta name="description" content="Xưởng mô phỏng sổ cái phân tán: mắt xích dữ liệu, sổ cái khối bất biến và trạm giao dịch ký bằng ECDSA — bài tập lớn môn Blockchain, Trường Đại học Đà Lạt.">
   <meta name="author" content="Khoa Công nghệ Thông tin — Trường Đại học Đà Lạt">
   <link rel="icon" href="assets/dlu-logo.png">
 
-  <!-- Phông chữ: nếu không có mạng, hệ thống tự lùi về font mặc định trong style.css -->
+  <!-- Bộ chữ: mất mạng thì tự lùi về bộ chữ hệ thống khai báo trong style.css -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Đọc chế độ nền đã lưu TRƯỚC khi vẽ, tránh nháy màu lúc tải trang -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('dlu-ledger-theme');
+        if (saved) document.documentElement.setAttribute('data-theme', saved);
+      } catch (e) { /* trình duyệt chặn bộ nhớ cục bộ */ }
+    })();
+  </script>
 </head>
 <body>
 
-  <!-- ===================== THANH ĐIỀU HƯỚNG ===================== -->
-  <header class="nav">
-    <nav class="nav-inner">
-      <a class="brand" href="#/">
-        <img src="assets/dlu-logo.png" alt="Logo Trường Đại học Đà Lạt">
-        <span class="brand-txt">
-          <b>DLU Blockchain Lab</b>
-          <span data-i18n="brand.sub">Trường Đại học Đà Lạt</span>
+  <!-- ===================== THANH ĐIỀU KHIỂN TRÊN ===================== -->
+  <header class="rail">
+    <nav class="rail-in">
+      <a class="mark" href="#/">
+        <img src="assets/dlu-logo.png" alt="Phù hiệu Trường Đại học Đà Lạt">
+        <span class="mark-txt">
+          <b>DLU Ledger Studio</b>
+          <span data-i18n="ui.markSub">Đại học Đà Lạt</span>
         </span>
       </a>
 
-      <div class="nav-links">
-        <a href="#/"            data-i18n="nav.home">Trang chủ</a>
-        <a href="#/linked-list" data-i18n="nav.ll">Danh sách liên kết</a>
-        <a href="#/blockchain"  data-i18n="nav.bc">Khối &amp; Chuỗi khối</a>
-        <a href="#/consensus"   data-i18n="nav.cs">Đồng thuận</a>
-        <a href="#/keys"        data-i18n="nav.ky">Khoá &amp; Chữ ký</a>
-        <a href="#/about"       data-i18n="nav.about">Giới thiệu</a>
+      <div class="rail-nav">
+        <a href="#/"        data-i18n="ui.nav.open">Tổng quan</a>
+        <a href="#/nodes"   data-i18n="ui.nav.nodes">Mắt xích</a>
+        <a href="#/ledger"  data-i18n="ui.nav.ledger">Sổ cái</a>
+        <a href="#/desk"    data-i18n="ui.nav.desk">Trạm giao dịch</a>
+        <a href="#/dossier" data-i18n="ui.nav.dossier">Hồ sơ</a>
       </div>
 
-      <button class="icon-btn lang-btn" id="langBtn" aria-label="Language">🇬🇧 EN</button>
-      <button class="icon-btn" id="themeBtn" aria-label="Theme">☀️</button>
-      <button class="icon-btn burger" id="burger" aria-label="Menu">☰</button>
+      <button class="ctrl lang-ctrl" id="langBtn" aria-label="Language">EN</button>
+      <button class="ctrl" id="themeBtn" aria-label="Theme">◐</button>
+      <button class="ctrl tap" id="tapBtn" aria-label="Menu">≡</button>
     </nav>
   </header>
 
-  <!-- ===================== NỘI DUNG TRANG ===================== -->
-  <main id="app"></main>
+  <!-- ===================== KHUNG NỘI DUNG ===================== -->
+  <main id="stage"></main>
 
   <!-- ===================== CHÂN TRANG ===================== -->
-  <footer class="footer">
-    <div class="wrap footer-inner">
-      <div class="fbrand">
-        <img src="assets/dlu-logo.png" alt="Logo Trường Đại học Đà Lạt">
+  <footer class="foot">
+    <div class="bound foot-in">
+      <div class="fmark">
+        <img src="assets/dlu-logo.png" alt="Phù hiệu Trường Đại học Đà Lạt">
         <div>
-          <p style="color:var(--text);font-weight:700">DLU Blockchain Lab</p>
-          <p data-i18n="footer.tagline">Đồ án môn Blockchain · Khoa Công nghệ Thông tin</p>
-          <p><a id="footerSource" href="#" target="_blank" rel="noopener"
-                class="footer-link" data-i18n="footer.source">Mã nguồn trên GitHub</a></p>
+          <p style="color:var(--txt);font-weight:700">DLU Ledger Studio</p>
+          <p data-i18n="ui.foot.tagline">Bài tập lớn môn Blockchain · Khoa Công nghệ Thông tin</p>
+          <p><a id="footRepo" href="#" target="_blank" rel="noopener"
+                class="foot-link" data-i18n="ui.foot.repo">Kho mã nguồn trên GitHub</a></p>
         </div>
       </div>
-      <p>© <span id="year">2026</span> <span data-i18n="footer.copy">Trường Đại học Đà Lạt — Dalat University.</span><br>
-         <span data-i18n="footer.note">Mọi phép băm SHA-256 đều được tính trực tiếp trên máy bạn.</span></p>
+      <p>© <span id="year">2026</span> <span data-i18n="ui.foot.copy">Trường Đại học Đà Lạt — Dalat University.</span><br>
+         <span data-i18n="ui.foot.note">Mọi phép băm và mọi chữ ký đều được tính ngay trên máy của bạn.</span></p>
     </div>
   </footer>
 
-  <!-- ===================== MÃ NGUỒN =====================
+  <!-- ===================== NẠP MÃ NGUỒN =====================
        Thứ tự nạp có ý nghĩa:
-         từ điển & cấu hình → thư viện → lõi thuật toán → giao diện → router.
-       Dùng script cổ điển (không phải ES module) để trang chạy được cả khi
-       mở trực tiếp bằng file:// mà không cần máy chủ web.                    -->
+         từ điển & cấu hình → thư viện băm → lõi thuật toán → tầng hiển thị → bộ định tuyến.
+       Dùng script cổ điển (không phải ES module) để trang mở được trực tiếp
+       bằng giao thức file:// mà không cần dựng máy chủ.                       -->
   <script src="js/i18n.js"></script>
   <script src="js/config.js"></script>
 
@@ -79,12 +88,11 @@
   <script src="js/core/ecdsa.js"></script>
 
   <script src="js/ui/dom.js"></script>
-  <script src="js/ui/view-home.js"></script>
-  <script src="js/ui/view-linkedlist.js"></script>
-  <script src="js/ui/view-blockchain.js"></script>
-  <script src="js/ui/view-consensus.js"></script>
-  <script src="js/ui/view-keys.js"></script>
-  <script src="js/ui/view-about.js"></script>
+  <script src="js/ui/view-open.js"></script>
+  <script src="js/ui/view-nodes.js"></script>
+  <script src="js/ui/view-ledger.js"></script>
+  <script src="js/ui/view-desk.js"></script>
+  <script src="js/ui/view-dossier.js"></script>
 
   <script src="js/app.js"></script>
 </body>

@@ -1,11 +1,11 @@
 /* =============================================================================
- *  config.js — THÔNG TIN ĐỀ TÀI & NHÓM SINH HIỆN
+ *  config.js — HỒ SƠ ĐỀ TÀI & DANH SÁCH NHÓM THỰC HIỆN
  * -----------------------------------------------------------------------------
- *  👉 ĐÂY LÀ TỆP DUY NHẤT BẠN CẦN SỬA để điền thông tin thật của nhóm.
- *     Sửa xong chỉ cần tải lại trang, không cần biên dịch gì cả.
+ *  👉 ĐÂY LÀ TỆP DUY NHẤT CẦN SỬA khi thay đổi thông tin nhóm hoặc học phần.
+ *     Sửa xong chỉ việc tải lại trang, không phải biên dịch gì cả.
  *
- *  Những chỗ đánh dấu  ← SỬA  là dữ liệu mẫu, hãy thay bằng thông tin của bạn.
- *  Trường nào có dạng { vi: '…', en: '…' } thì điền cả hai ngôn ngữ.
+ *  Chỗ nào đánh dấu  ← SỬA  là dữ liệu tạm, hãy thay bằng thông tin thật.
+ *  Trường có dạng { vi: '…', en: '…' } thì điền cho cả hai ngôn ngữ.
  * ========================================================================== */
 (function (global) {
   'use strict';
@@ -17,56 +17,59 @@
      *  1. KHO MÃ NGUỒN
      * ------------------------------------------------------------------- */
     github: {
-      // Đường dẫn kho GitHub của đồ án
-      url: 'https://github.com/tiennhathuynh/BlockChain',   // ← SỬA
-      // Dòng lệnh hiển thị ở nút "Tải về bằng Git"
-      clone: 'git clone https://github.com/tiennhathuynh/BlockChain.git' // ← SỬA
+      url:   'https://github.com/TranPhiHung1/BlockChain',
+      clone: 'git clone https://github.com/TranPhiHung1/BlockChain.git'
     },
 
     /* ---------------------------------------------------------------------
-     *  2. THÔNG TIN HỌC PHẦN
+     *  2. HỌC PHẦN
      * ------------------------------------------------------------------- */
     course: {
       subject:  { vi: 'Blockchain', en: 'Blockchain' },
       lecturer: { vi: 'ThS. Nguyễn Văn A', en: 'Nguyen Van A, M.Sc.' },        // ← SỬA
       faculty:  { vi: 'Khoa Công nghệ Thông tin', en: 'Faculty of Information Technology' },
       school:   { vi: 'Trường Đại học Đà Lạt', en: 'Dalat University' },
-      className:{ vi: 'CTK46 — Công nghệ Thông tin', en: 'CTK46 — Information Technology' }, // ← SỬA
-      year:     { vi: '2025 – 2026', en: '2025 – 2026' },                      // ← SỬA
-      term:     { vi: 'Học kỳ I', en: 'Semester I' }                           // ← SỬA
+      className:{ vi: 'CTK47 — Công nghệ Thông tin', en: 'CTK47 — Information Technology' }, // ← SỬA
+      year:     { vi: '2025 – 2026', en: '2025 – 2026' },
+      term:     { vi: 'Học kỳ I', en: 'Semester I' }
     },
 
     /* ---------------------------------------------------------------------
-     *  3. DANH SÁCH SINH VIÊN
-     *     Thêm/bớt phần tử tuỳ số thành viên. Giao diện tự dàn lại lưới.
-     *       emoji  — ảnh đại diện dạng biểu tượng (hoặc để '' thì hiện chữ cái đầu)
-     *       email, github — để chuỗi rỗng '' nếu không muốn hiện
+     *  3. NHÓM THỰC HIỆN
+     *     lead: true  → đánh dấu nhóm trưởng (thẻ đổi màu và có nhãn riêng)
+     *     email / github — để chuỗi rỗng '' nếu không muốn công khai
      * ------------------------------------------------------------------- */
-    team: [                                                                    // ← SỬA cả khối
+    team: [
       {
-        name: 'Nguyễn Đăng Nhật Tiến',
-        id: '2012345',
-        emoji: '🌲',
-        role: { vi: 'Trưởng nhóm · Kiến trúc & Giao thức đồng thuận',
-                en: 'Team lead · Architecture & consensus protocols' },
-        email: '',   // ← điền email nếu muốn hiện công khai trên trang Giới thiệu
-        github: ''
-      },
-      {
-        name: 'Thành viên 2',
-        id: '2012346',
-        emoji: '🌊',
-        role: { vi: 'Cấu trúc dữ liệu & Chuỗi khối',
-                en: 'Data structures & blockchain' },
+        name: 'Trần Phi Hùng',
+        id: '2312628',
+        lead: true,
+        role: { vi: 'Nhóm trưởng · Kiến trúc hệ thống & tích hợp các phân hệ',
+                en: 'Team lead · System architecture & module integration' },
         email: '',
         github: ''
       },
       {
-        name: 'Thành viên 3',
-        id: '2012347',
-        emoji: '🏙️',
-        role: { vi: 'Giao diện & Trải nghiệm người dùng',
-                en: 'Interface & user experience' },
+        name: 'Nguyễn Hữu Quốc Việt',
+        id: '2312798',
+        role: { vi: 'Lõi mật mã: hàm băm SHA-256 và chữ ký ECDSA secp256k1',
+                en: 'Cryptographic core: SHA-256 hashing and secp256k1 ECDSA signatures' },
+        email: '',
+        github: ''
+      },
+      {
+        name: 'Trần Minh Tiến',
+        id: '2312773',
+        role: { vi: 'Cấu trúc dữ liệu: mắt xích liên kết và sổ cái khối',
+                en: 'Data structures: the linked chain and the block ledger' },
+        email: '',
+        github: ''
+      },
+      {
+        name: 'Nguyễn Đặng Nhật Tiên',
+        id: '2312767',
+        role: { vi: 'Giao diện, trải nghiệm sử dụng và biên soạn nội dung song ngữ',
+                en: 'Interface, user experience and bilingual content authoring' },
         email: '',
         github: ''
       }

@@ -1,5 +1,5 @@
 # =============================================================================
-#  serve.ps1 — Máy chủ tĩnh tối giản cho DLU Blockchain Lab
+#  serve.ps1 — Máy chủ tĩnh tối giản cho DLU Ledger Studio
 # -----------------------------------------------------------------------------
 #  Dùng khi máy CHƯA cài Node.js hay Python. Chỉ cần Windows PowerShell.
 #
@@ -35,7 +35,7 @@ try {
 }
 
 Write-Host ""
-Write-Host "  DLU Blockchain Lab dang chay tai  http://localhost:$Port/" -ForegroundColor Green
+Write-Host "  DLU Ledger Studio dang chay tai  http://localhost:$Port/" -ForegroundColor Green
 Write-Host "  Thu muc goc: $Root"
 Write-Host "  Nhan Ctrl+C de dung." -ForegroundColor DarkGray
 Write-Host ""
@@ -57,6 +57,8 @@ while ($listener.IsListening) {
     if (-not $type) { $type = 'application/octet-stream' }
     $bytes = [System.IO.File]::ReadAllBytes($fullFile)
     $context.Response.ContentType = $type
+    # May chu chi dung de phat trien: khong cho trinh duyet nho dem ban cu
+    $context.Response.Headers.Add('Cache-Control', 'no-store, must-revalidate')
     $context.Response.ContentLength64 = $bytes.Length
     $context.Response.OutputStream.Write($bytes, 0, $bytes.Length)
     Write-Host ("  200  " + $path) -ForegroundColor DarkGray
