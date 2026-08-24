@@ -227,7 +227,7 @@
             '<button class="act act-line act-xs" data-act="seed">' + d.esc(t('nd.b.seed')) + '</button>' +
             '<button class="act act-line act-xs" data-act="wipe">' + d.esc(t('nd.b.wipe')) + '</button>' +
           '</div>' +
-          '<p style="font-size:12px;color:var(--txt-3);margin-top:12px">' +
+          '<p style="font-size:12.5px;color:var(--txt-3);margin-top:12px">' +
             d.esc(t('nd.hint')) + '</p>' +
         '</div>' +
 

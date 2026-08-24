@@ -134,6 +134,7 @@
     this.emoji = cfg.emoji || '🖥️';
     this.hashPower = cfg.hashPower || 20; // % sức đào — dùng cho PoW
     this.stake = cfg.stake || 100;        // số coin đặt cọc — dùng cho PoS
+    this.address = cfg.address || '';     // địa chỉ ví nhận thưởng khối
     this.honest = true;                   // bị đánh dấu false khi gian lận
     this.chain = null;                    // Blockchain riêng của nút
     this.lastAction = { key: 'cs.peer.init' };
@@ -159,16 +160,25 @@
     this.peers = cfg.peers;
     this.difficulty = cfg.difficulty || 0;
     this.log = [];
-    this.reset(cfg.genesisData || 'Genesis Block — DLU Blockchain');
+    this.reset(cfg.genesisData || 'Genesis Block — DLU Blockchain', cfg.genesisTxs);
   }
 
-  /** Khởi tạo lại: mọi nút cùng xuất phát từ một chuỗi Genesis giống hệt nhau. */
-  Network.prototype.reset = function (genesisData) {
+  /**
+   * Khởi tạo lại: mọi nút cùng xuất phát từ một chuỗi Genesis giống hệt nhau.
+   * @param {string} genesisData nhãn của khối gốc
+   * @param {Array} [genesisTxs] các bút toán phát hành ban đầu (coinbase)
+   */
+  Network.prototype.reset = function (genesisData, genesisTxs) {
     var genesisChain = new Blockchain({
       autoGenesis: false, difficulty: this.difficulty
     });
     // Genesis dùng timestamp cố định để mọi nút có hash y hệt nhau
     var genesis = new Block(genesisData, Blockchain.ZERO_HASH, 1700000000);
+    if (genesisTxs && genesisTxs.length) {
+      genesis.txs = genesisTxs.slice();
+      genesis.merkleRoot = DLU.merkle.root(genesis.txs.map(function (tx) { return tx.txid; }));
+      genesis.hash = genesis.computeHash();
+    }
     if (this.difficulty) genesisChain.mine(genesis);
     genesisChain.head = genesisChain.tail = genesis;
     genesisChain.length = 1;
@@ -380,12 +390,286 @@
     return Math.max(0, Math.min(1, sum));
   }
 
+  /* =======================================================================
+   *  4. GIAO DỊCH & LUẬT XÁC THỰC CỦA MỖI NÚT
+   * -----------------------------------------------------------------------
+   *  Tới đây mới đủ mảnh ghép cho một mạng thật sự: khối không còn chứa một
+   *  dòng chữ, mà chứa một TẬP GIAO DỊCH có chữ ký. Khi nhận được khối, mỗi nút
+   *  KHÔNG tin lời người gửi — nó tự tính lại tất cả:
+   *
+   *    · txid  = SHA256(nội dung phiếu ‖ chữ ký)      → phiếu có bị sửa không
+   *    · chữ ký ECDSA phải khớp với khoá công khai     → ai lập phiếu
+   *    · địa chỉ ví phải suy ra được từ khoá công khai → đúng chủ tài khoản
+   *    · số dư (tính lại từ chuỗi của CHÍNH NÓ) phải đủ
+   *    · gốc Merkle dựng lại từ danh sách txid phải khớp header
+   *    · mã băm khối băm lại phải khớp, và phải thoả độ khó
+   *    · previous_hash phải trỏ đúng đỉnh chuỗi của nó
+   *
+   *  Chỉ khi TẤT CẢ đều đúng nút mới bỏ phiếu thuận. Không có phiếu nào được
+   *  gán sẵn, mọi kết luận đều là kết quả tính toán trên dữ liệu thật.
+   * ===================================================================== */
+
+  /** Địa chỉ "kho phát hành" — nguồn tiền của các bút toán coinbase. */
+  var COINBASE = '0x' + new Array(41).join('0');
+
+  /** Làm tròn 4 chữ số thập phân để phép cộng dồn số dư không bị trôi. */
+  function round4(value) {
+    return Math.round(value * 10000) / 10000;
+  }
+
+  /**
+   * Địa chỉ ví = 40 ký tự hex cuối của SHA-256(khoá công khai).
+   * Giữ đúng quy ước đã dùng ở Trạm giao dịch (view-desk.js).
+   */
+  function addressOf(publicHex) {
+    return '0x' + DLU.sha256(publicHex).slice(-40);
+  }
+
+  /** Chuỗi nguyên liệu đem đi ký — dựng lại từ trạng thái hiện tại của phiếu. */
+  function txPayload(tx) {
+    return 'DLU-TX/1' +
+      '|from=' + tx.fromAddr +
+      '|to=' + tx.toAddr +
+      '|amount=' + Number(tx.amount).toFixed(4) +
+      '|nonce=' + tx.nonce +
+      '|memo=' + tx.memo;
+  }
+
+  /** Mã định danh giao dịch: băm cả nội dung LẪN chữ ký (như txid của Bitcoin). */
+  function txHash(tx) {
+    return DLU.sha256(txPayload(tx) + '|sig=' + (tx.sigDer || 'coinbase'));
+  }
+
+  /**
+   * Lập một phiếu chuyển tiền và ký ngay bằng khoá riêng của người gửi.
+   * @param {object} f { fromAddr, toAddr, amount, nonce, memo, keys }
+   *                   keys = cặp khoá do DLU.ecdsa.generateKeyPair() sinh ra
+   */
+  function makeTx(f) {
+    var tx = {
+      fromAddr: f.fromAddr,
+      toAddr: f.toAddr,
+      amount: round4(f.amount),
+      nonce: f.nonce,
+      memo: f.memo || '',
+      stamp: f.stamp || Date.now() / 1000,
+      pub: f.keys ? f.keys.uncompressed : '',
+      sigDer: '',
+      coinbase: false,
+      from: f.from || '', to: f.to || ''      // nhãn hiển thị, không đi vào chữ ký
+    };
+    if (f.keys) {
+      tx.sigDer = DLU.ecdsa.sign(f.keys.privateHex, txPayload(tx)).der;
+    }
+    tx.txid = txHash(tx);
+    return tx;
+  }
+
+  /** Bút toán phát hành / tiền thưởng khối — không có người gửi nên không có chữ ký. */
+  function makeCoinbase(toAddr, amount, nonce, memo, to) {
+    var tx = {
+      fromAddr: COINBASE, toAddr: toAddr,
+      amount: round4(amount), nonce: nonce, memo: memo || '',
+      stamp: Date.now() / 1000,
+      pub: '', sigDer: '', coinbase: true,
+      from: 'COINBASE', to: to || ''
+    };
+    tx.txid = txHash(tx);
+    return tx;
+  }
+
+  /**
+   * Sửa trộm số tiền SAU KHI đã ký — chữ ký cũ và txid cũ giữ nguyên.
+   * Dùng để chứng minh: nút mạng sẽ tự phát hiện, không cần ai mách.
+   */
+  function tamperTx(tx, newAmount) {
+    tx.amount = round4(newAmount);
+    tx.tampered = true;
+    return tx;
+  }
+
+  /**
+   * Trạng thái sổ cái theo bản sao chuỗi của MỘT nút: số dư từng địa chỉ và
+   * tập txid đã tiêu. Tính lại từ đầu chuỗi, không lưu sẵn ở đâu cả.
+   */
+  function stateOf(chain) {
+    var balances = {};
+    var spent = {};
+    chain.toArray().forEach(function (block) {
+      (block.txs || []).forEach(function (tx) {
+        if (tx.fromAddr !== COINBASE) {
+          balances[tx.fromAddr] = round4((balances[tx.fromAddr] || 0) - tx.amount);
+        }
+        balances[tx.toAddr] = round4((balances[tx.toAddr] || 0) + tx.amount);
+        spent[tx.txid] = true;
+      });
+    });
+    return { balances: balances, spent: spent };
+  }
+
+  /**
+   * Soi một giao dịch theo trạng thái sổ cái đang có.
+   * @returns {{ok: boolean, checks: Array<{key, ok, got}>}}
+   */
+  function reviewTx(tx, state, pendingSpend) {
+    var recomputedId = txHash(tx);
+    var idOk = recomputedId === tx.txid;
+
+    var sigOk = true, ownerOk = true;
+    if (!tx.coinbase) {
+      sigOk = DLU.ecdsa.verify(tx.pub, txPayload(tx), tx.sigDer).valid;
+      ownerOk = addressOf(tx.pub) === tx.fromAddr;
+    }
+
+    var amountOk = isFinite(tx.amount) && tx.amount > 0;
+
+    var available = tx.coinbase ? Infinity
+      : round4((state.balances[tx.fromAddr] || 0) - (pendingSpend[tx.fromAddr] || 0));
+    var fundsOk = tx.coinbase || available >= tx.amount;
+
+    var freshOk = !state.spent[tx.txid];
+
+    var checks = [
+      { key: 'txid',   ok: idOk,      got: recomputedId },
+      { key: 'sig',    ok: sigOk },
+      { key: 'owner',  ok: ownerOk,   got: tx.coinbase ? '' : addressOf(tx.pub) },
+      { key: 'amount', ok: amountOk },
+      { key: 'funds',  ok: fundsOk,   got: available === Infinity ? '' : available },
+      { key: 'replay', ok: freshOk }
+    ];
+
+    return {
+      ok: checks.every(function (c) { return c.ok; }),
+      checks: checks
+    };
+  }
+
+  /** Số dư của một địa chỉ theo bản sao chuỗi của nút này. */
+  Peer.prototype.balanceOf = function (address) {
+    return stateOf(this.chain).balances[address] || 0;
+  };
+
+  /** Chiều cao chuỗi mà nút đang giữ. */
+  Peer.prototype.height = function () {
+    return this.chain ? this.chain.length : 0;
+  };
+
+  /**
+   * NÚT TỰ THẨM ĐỊNH MỘT KHỐI ĐƯỢC PHÁT SÓNG.
+   * Không tham số nào quyết định sẵn kết quả: mọi mục đều được tính lại.
+   *
+   * @param {Block} block khối nhận từ mạng
+   * @param {number} difficulty độ khó mà mạng đang quy ước
+   * @returns {{ok, checks: Array, txReports: Array}}
+   */
+  Peer.prototype.review = function (block, difficulty) {
+    var state = stateOf(this.chain);
+    var pendingSpend = {};   // tiền đã bị tiêu bởi các phiếu đứng trước trong khối
+    var txReports = [];
+    var allTxOk = true;
+
+    (block.txs || []).forEach(function (tx) {
+      var report = reviewTx(tx, state, pendingSpend);
+      if (report.ok && !tx.coinbase) {
+        pendingSpend[tx.fromAddr] = round4((pendingSpend[tx.fromAddr] || 0) + tx.amount);
+      }
+      if (!report.ok) allTxOk = false;
+      txReports.push({ tx: tx, report: report });
+    });
+
+    var recomputedRoot = DLU.merkle.root((block.txs || []).map(function (tx) {
+      return tx.txid;
+    }));
+    var recomputedHash = block.computeHash();
+
+    var checks = [
+      { key: 'link',   ok: this.tip() === block.previousHash, got: this.tip() },
+      { key: 'merkle', ok: recomputedRoot === block.merkleRoot, got: recomputedRoot },
+      { key: 'hash',   ok: block.hash === recomputedHash, got: recomputedHash },
+      { key: 'pow',    ok: block.meetsDifficulty(difficulty) },
+      { key: 'txs',    ok: allTxOk }
+    ];
+
+    return {
+      ok: checks.every(function (c) { return c.ok; }),
+      checks: checks,
+      txReports: txReports
+    };
+  };
+
+  /** Bản sao độc lập của một khối — mỗi nút cất một bản riêng trong chuỗi của nó. */
+  function cloneBlock(block) {
+    var copy = new Block(block.data, block.previousHash, block.timestamp);
+    copy.nonce = block.nonce;
+    copy.difficulty = block.difficulty;
+    copy.merkleRoot = block.merkleRoot;
+    copy.txs = (block.txs || []).slice();
+    copy.miner = block.miner;
+    copy.hash = block.hash;
+    return copy;
+  }
+
+  /** Nối khối vào đuôi chuỗi của một nút. */
+  Network.prototype.attach = function (peer, block) {
+    var copy = cloneBlock(block);
+    if (peer.chain.tail) {
+      peer.chain.tail.next = copy;
+      peer.chain.tail = copy;
+    } else {
+      peer.chain.head = peer.chain.tail = copy;
+    }
+    peer.chain.length++;
+    return copy;
+  };
+
+  /**
+   * PHÁT SÓNG KHỐI & BỎ PHIẾU.
+   *
+   * Mỗi nút chạy `review` trên bản sao chuỗi của chính nó rồi bỏ một phiếu.
+   * Khối chỉ được ghi vào sổ khi số phiếu thuận đạt quá bán (quorum) — quy tắc
+   * đa số của mạng, tính từ số phiếu thật chứ không đặt sẵn.
+   *
+   * @returns {{votes: Array, yes: number, quorum: number, finalized: boolean}}
+   */
+  Network.prototype.broadcastBlock = function (block) {
+    var self = this;
+    var votes = this.peers.map(function (peer) {
+      var verdict = peer.review(block, self.difficulty);
+      peer.lastAction = { key: verdict.ok ? 'cs.peer.voteYes' : 'cs.peer.voteNo' };
+      return { peer: peer, verdict: verdict };
+    });
+
+    var yes = votes.filter(function (v) { return v.verdict.ok; });
+    var quorum = Math.floor(this.peers.length / 2) + 1;   // quá bán
+    var finalized = yes.length >= quorum;
+
+    if (finalized) {
+      yes.forEach(function (v) {
+        self.attach(v.peer, block);
+        v.peer.lastAction = { key: 'cs.peer.recv', params: { i: v.peer.chain.length - 1 } };
+      });
+    }
+
+    return { votes: votes, yes: yes.length, quorum: quorum, finalized: finalized };
+  };
+
   DLU.consensus = {
     mineAsync: mineAsync,
     expectedAttempts: expectedAttempts,
     Peer: Peer,
     Network: Network,
     attackSuccessProbability: attackSuccessProbability,
+    COINBASE: COINBASE,
+    addressOf: addressOf,
+    txPayload: txPayload,
+    txHash: txHash,
+    makeTx: makeTx,
+    makeCoinbase: makeCoinbase,
+    tamperTx: tamperTx,
+    stateOf: stateOf,
+    reviewTx: reviewTx,
+    cloneBlock: cloneBlock,
+    round4: round4,
     // Danh sách giao thức để dựng bảng so sánh; mọi câu chữ nằm ở js/i18n.js
     // dưới các khoá 'cs.proto.<key>.<trường>'
     PROTOCOL_KEYS: ['pow', 'pos', 'pbft']

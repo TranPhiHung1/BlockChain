@@ -16,6 +16,7 @@
     '/nodes':   { view: 'nodes',   titleKey: 'ui.nav.nodes' },
     '/ledger':  { view: 'ledger',  titleKey: 'ui.nav.ledger' },
     '/desk':    { view: 'desk',    titleKey: 'ui.nav.desk' },
+    '/network': { view: 'network', titleKey: 'ui.nav.network' },
     '/dossier': { view: 'dossier', titleKey: 'ui.nav.dossier' }
   };
 
@@ -138,6 +139,10 @@
     });
 
     d.$('#year').textContent = new Date().getFullYear();
+
+    // Trợ lý gắn thẳng vào <body>, ngoài thẻ <main>, nên chỉ dựng đúng một lần
+    // và sống sót qua mọi lần chuyển trang.
+    DLU.assistantUI.mount();
 
     global.addEventListener('hashchange', navigate);
     navigate();

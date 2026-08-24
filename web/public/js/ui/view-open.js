@@ -10,7 +10,8 @@
   var GATES = [
     { href: '#/nodes',  no: '01', k: 'nodes' },
     { href: '#/ledger', no: '02', k: 'ledger' },
-    { href: '#/desk',   no: '03', k: 'desk' }
+    { href: '#/desk',   no: '03', k: 'desk' },
+    { href: '#/network', no: '04', k: 'network' }
   ];
 
   var TRAITS = ['1', '2', '3', '4'];
@@ -77,7 +78,7 @@
         '<div class="rows rows-3">' +
           GATES.map(function (g) {
             return '<a class="gate" href="' + g.href + '">' +
-              '<span class="no">' + g.no + ' / 03</span>' +
+              '<span class="no">' + g.no + ' / 04</span>' +
               '<h3>' + d.esc(t('hm.gate.' + g.k + '.h')) + '</h3>' +
               '<p>' + d.esc(t('hm.gate.' + g.k + '.p')) + '</p>' +
               '<span class="go">' + d.esc(t('hm.gate.go')) + ' →</span>' +
@@ -110,7 +111,7 @@
             '<span class="tag">' + d.esc(t('hm.mill.inLen')) + ' <b id="millLen">0</b></span>' +
             '<span class="tag">' + d.esc(t('hm.mill.outLen')) + ' <b>64 hex · 256 bit</b></span>' +
           '</div>' +
-          '<p style="font-size:12.5px;color:var(--txt-2);margin-top:12px">' +
+          '<p style="font-size:13px;color:var(--txt-2);margin-top:12px">' +
             t('hm.mill.note') + '</p>' +
         '</div>' +
 
@@ -118,8 +119,8 @@
           TRAITS.map(function (i) {
             return '<div class="slab slab-plain">' +
               '<span class="tag tag-a">0' + i + '</span>' +
-              '<h3 style="font-size:15px;margin:11px 0 6px">' + d.esc(t('hm.tr' + i + 'h')) + '</h3>' +
-              '<p style="font-size:13px;color:var(--txt-2)">' + d.esc(t('hm.tr' + i + 'p')) + '</p>' +
+              '<h3 style="font-size:15.5px;margin:11px 0 6px">' + d.esc(t('hm.tr' + i + 'h')) + '</h3>' +
+              '<p style="font-size:13.5px;color:var(--txt-2)">' + d.esc(t('hm.tr' + i + 'p')) + '</p>' +
             '</div>';
           }).join('') +
         '</div>' +

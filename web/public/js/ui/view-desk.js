@@ -239,7 +239,7 @@
       '</div>';
 
     var refused = tx.refused
-      ? '<div class="tip" style="margin-top:9px;border-left-color:var(--no);font-size:12px">' +
+      ? '<div class="tip" style="margin-top:9px;border-left-color:var(--no);font-size:12.5px">' +
         d.esc(t(tx.refused)) + '</div>' : '';
 
     return '<div class="deal ' + cls + '">' +
@@ -255,7 +255,7 @@
       '<dl class="deal-grid">' +
         '<dt>' + d.esc(t('wl.d.memo')) + '</dt><dd>' + d.esc(tx.memo) + '</dd>' +
         '<dt>' + d.esc(t('wl.d.payload')) + '</dt>' +
-          '<dd class="digest" style="font-size:10.5px">' + d.esc(payload(tx)) + '</dd>' +
+          '<dd class="digest" style="font-size:12px">' + d.esc(payload(tx)) + '</dd>' +
         '<dt>' + d.esc(t('wl.d.digest')) + '</dt>' +
           '<dd class="digest">' + d.esc(d.shortHash(tx.sig.z, 16)) + '</dd>' +
         '<dt>r</dt><dd class="digest">' + d.esc(d.shortHash(tx.sig.r, 14)) + '</dd>' +
@@ -351,7 +351,7 @@
         ? '<div class="rows" style="gap:9px;margin-top:11px">' +
             deals.map(function (tx) { return dealHtml(tx, 'block'); }).join('') +
           '</div>'
-        : '<div class="tip" style="margin-top:11px;font-size:12px">' +
+        : '<div class="tip" style="margin-top:11px;font-size:12.5px">' +
             d.esc(t('wl.c.coinbase', { n: num(OPENING), c: COIN })) + '</div>';
 
       return tie +
@@ -365,7 +365,7 @@
           '</div>' +
           '<dl class="spec">' +
             '<dt>' + d.esc(t('wl.c.stamp')) + '</dt>' +
-              '<dd class="mono" style="font-size:12px">' + d.esc(d.fmtTime(b.timestamp)) + '</dd>' +
+              '<dd class="mono" style="font-size:12.5px">' + d.esc(d.fmtTime(b.timestamp)) + '</dd>' +
             '<dt>' + d.esc(t('wl.c.prev')) + '</dt>' +
               '<dd class="digest">' + d.esc(b.previousHash) + '</dd>' +
             '<dt>' + d.esc(t('wl.c.self')) + '</dt>' +
@@ -517,7 +517,7 @@
           '<div class="fld">' +
             '<label for="wlFrom">' + d.esc(t('wl.f.from')) + '</label>' +
             '<select id="wlFrom">' + options('A') + '</select>' +
-            '<span class="mono" id="wlFromBal" style="font-size:11px;color:var(--txt-3)"></span>' +
+            '<span class="mono" id="wlFromBal" style="font-size:12px;color:var(--txt-3)"></span>' +
           '</div>' +
           '<div class="fld">' +
             '<label for="wlTo">' + d.esc(t('wl.f.to')) + '</label>' +
@@ -546,7 +546,7 @@
           '<button class="act act-key" data-act="sign">' + d.esc(t('wl.f.sign')) + '</button>' +
           '<button class="act act-line" data-act="reset">' + d.esc(t('wl.f.reset')) + '</button>' +
         '</div>' +
-        '<div id="wlFlash" class="tip hidden" style="margin-top:13px;font-size:12.5px"></div>' +
+        '<div id="wlFlash" class="tip hidden" style="margin-top:13px;font-size:13px"></div>' +
       '</div>' +
 
       /* ---- 3. Hàng chờ + phòng kiểm chứng ---- */
@@ -582,8 +582,8 @@
         '<div class="rows rows-4">' +
           [1, 2, 3, 4].map(function (i) {
             return '<div>' +
-              '<b style="color:var(--blue-2);font-size:14px">' + d.esc(t('wl.why.' + i + 'h')) + '</b>' +
-              '<p style="font-size:12.5px;color:var(--txt-2);margin-top:6px">' +
+              '<b style="color:var(--blue-2);font-size:14.5px">' + d.esc(t('wl.why.' + i + 'h')) + '</b>' +
+              '<p style="font-size:13px;color:var(--txt-2);margin-top:6px">' +
                  d.esc(t('wl.why.' + i + 'p')) + '</p>' +
             '</div>';
           }).join('') +

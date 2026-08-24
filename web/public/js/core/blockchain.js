@@ -41,13 +41,25 @@
     // khối Bitcoin. Nhờ lưu riêng từng khối, việc chỉnh độ khó của chuỗi chỉ
     // ảnh hưởng tới các khối tạo sau, không làm mất hiệu lực khối cũ.
     this.difficulty = 0;
+    // Gốc Merkle của tập giao dịch trong khối (xem core/merkle.js). Trang Sổ cái
+    // và trang Mắt xích không dùng tới nên để rỗng — khi rỗng, chuỗi nguyên liệu
+    // băm trùng khớp y hệt bản Python. Trang Mạng lưới thì gán gốc Merkle thật
+    // và chính nó khoá toàn bộ giao dịch vào mã băm của khối.
+    this.merkleRoot = '';
+    this.txs = [];                    // danh sách giao dịch (nếu khối có mang)
+    this.miner = '';                  // nút đã đóng được khối này
     this.next = null;                 // con trỏ danh sách liên kết
     this.hash = this.computeHash();   // vân tay SHA-256 của khối
   }
 
-  /** Chuỗi nguyên liệu được đưa vào hàm băm — hiển thị nguyên văn trên giao diện. */
+  /**
+   * Chuỗi nguyên liệu được đưa vào hàm băm — hiển thị nguyên văn trên giao diện.
+   * Tương ứng phần đầu khối (block header) của Bitcoin:
+   *     previous_hash ‖ timestamp ‖ data ‖ merkle_root ‖ nonce
+   */
   Block.prototype.headerString = function () {
-    return '' + this.previousHash + this.timestamp + this.data + (this.nonce || '');
+    return '' + this.previousHash + this.timestamp + this.data +
+           (this.merkleRoot || '') + (this.nonce || '');
   };
 
   /** Tính lại mã băm từ nội dung hiện tại của khối. */
@@ -248,6 +260,9 @@
       var nb = new Block(b.data, b.previousHash, b.timestamp);
       nb.nonce = b.nonce;
       nb.difficulty = b.difficulty;
+      nb.merkleRoot = b.merkleRoot;
+      nb.txs = b.txs.slice();         // cùng tham chiếu giao dịch, khác mảng
+      nb.miner = b.miner;
       nb.hash = b.hash;               // sao chép nguyên trạng, kể cả khi đã hỏng
       if (copy.tail) { copy.tail.next = nb; copy.tail = nb; }
       else { copy.head = nb; copy.tail = nb; }

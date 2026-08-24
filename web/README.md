@@ -4,13 +4,14 @@ Xưởng mô phỏng sổ cái phân tán cho môn **Blockchain** — Khoa Công
 Trường Đại học Đà Lạt. Viết bằng **JavaScript thuần**: không framework, không thư
 viện ngoài, không bước biên dịch.
 
-Trang gồm đúng ba phân hệ, nối nhau theo mạch suy luận kỹ thuật:
+Trang gồm đúng bốn phân hệ, nối nhau theo mạch suy luận kỹ thuật:
 
 | # | Phân hệ | Lỗ hổng nó vá |
 |---|---------|---------------|
 | 01 | **Mắt xích dữ liệu** | Cấu trúc nền: một nút giữ dữ liệu + địa chỉ nút kế tiếp |
 | 02 | **Sổ cái khối** | Khoá cấu trúc lại bằng dấu niêm phong `previous_hash` (SHA-256) |
 | 03 | **Trạm giao dịch** | Chứng minh *ai* lập ra bút toán, bằng cặp khoá ECDSA secp256k1 |
+| 04 | **Mạng lưới** | Nhiều nút không tin nhau: cây Merkle, bằng chứng công việc và đồng thuận quá bán |
 
 ---
 
@@ -56,15 +57,17 @@ web/
 │       ├── lib/sha256.js       SHA-256 tự cài (FIPS 180-4), chạy đồng bộ
 │       ├── core/               ← Thuật toán thuần, KHÔNG đụng tới DOM
 │       │   ├── linked-list.js  Dây mắt xích (danh sách liên kết đơn)
-│       │   ├── blockchain.js   Block & Blockchain
+│       │   ├── blockchain.js   Block & Blockchain (header có cả merkle_root)
+│       │   ├── merkle.js       Cây Merkle: gốc Merkle & đường chứng minh
 │       │   ├── ecdsa.js        secp256k1, ECDSA, xuất PEM (từ Key.py)
-│       │   └── consensus.js    Bộ dò nonce bất đồng bộ dùng cho thanh độ khó
+│       │   └── consensus.js    Dò nonce, nút mạng, giao dịch, luật xác thực, bỏ phiếu
 │       ├── ui/                 ← Tầng hiển thị, mỗi trang một tệp
 │       │   ├── dom.js          Tiện ích DOM dùng chung
 │       │   ├── view-open.js       Tổng quan
 │       │   ├── view-nodes.js      Phân hệ 01 — Mắt xích dữ liệu
 │       │   ├── view-ledger.js     Phân hệ 02 — Sổ cái khối
 │       │   ├── view-desk.js       Phân hệ 03 — Trạm giao dịch
+│       │   ├── view-network.js    Phân hệ 04 — Mạng lưới
 │       │   └── view-dossier.js    Hồ sơ đồ án
 │       ├── i18n.js             Từ điển song ngữ Việt – Anh (toàn bộ câu chữ)
 │       ├── config.js           ← Thông tin nhóm, học phần, GitHub (SỬA Ở ĐÂY)
@@ -97,7 +100,51 @@ Phân hệ 03 gói trọn vòng đời một giao dịch, đúng thứ tự mộ
 
 ---
 
-## 4. Đối chiếu với mã Python gốc của đồ án
+## 4. Mạng lưới làm những gì
+
+Phân hệ 04 là nơi mọi mảnh ghép chạy cùng nhau, đúng thứ tự của một blockchain thật:
+
+> Nút mạng → Giao dịch → Cây Merkle → Gốc Merkle → Khối → Mã băm → `previous_hash`
+> → Đồng thuận → Khối chung cuộc
+
+1. **Bốn nút** — mỗi nút có một cặp khoá secp256k1 riêng, một mức sức đào, một mức cổ
+   phần và **một bản sao sổ cái riêng**. Số dư ban đầu nằm trong khối Genesis dưới dạng
+   bút toán coinbase, không phải một biến đếm rời.
+2. **Giao dịch** — chọn bên chuyển / bên nhận / số tiền, phiếu được ký ngay bằng khoá
+   riêng của nút gửi; `txid = SHA256(nội dung ‖ chữ ký)`.
+3. **Cây Merkle** — dựng từ danh sách `txid` thật, số lá lẻ thì lá cuối nhân đôi (quy
+   ước Bitcoin). Trang vẽ đủ các tầng từ lá lên gốc.
+4. **Khối** — header gồm `previous_hash` (lấy từ đỉnh chuỗi của chính nút đề xuất),
+   `merkle_root`, `timestamp`, `nonce`. Trang hiện nguyên văn chuỗi đưa vào SHA-256.
+5. **Bằng chứng công việc** — dò nonce bằng `mineAsync`, hiện nonce và tốc độ băm theo
+   thời gian thực.
+6. **Đồng thuận** — khối được phát sóng, **mỗi nút tự chạy `Peer.review()`** trên bản
+   sao chuỗi của chính nó: băm lại header, dựng lại gốc Merkle, kiểm từng chữ ký, tính
+   lại số dư, đối chiếu `previous_hash` và độ khó. Khối chỉ vào sổ khi số phiếu thuận
+   đạt quá bán.
+7. **Bảng tra cứu** — hiển thị chuỗi hợp lệ dài nhất, mở từng khối ra xem giao dịch bên
+   trong; nút **Đồng bộ mạng** áp dụng quy tắc chuỗi hợp lệ dài nhất.
+
+Bốn tình huống đối chứng, tất cả đều bị bắt bằng phép tính chứ không phải bằng cờ dựng
+sẵn: phát sóng khối **chưa đào** (trượt `pow`), **sửa trộm số tiền** sau khi ký (trượt
+`txid` và `sig`), **đổi trộm gốc Merkle** trong header (trượt `merkle`), và một nút
+**sửa trộm sổ của chính nó** (chuỗi gãy, phải chép lại chuỗi thắng cuộc).
+
+### Không có dữ liệu giả — cách tự kiểm chứng
+
+Mở Console của trình duyệt tại trang Mạng lưới rồi gõ:
+
+```js
+DLU.views.network.debug()
+```
+
+Kết quả in ra, với mỗi khối, mã băm **đang lưu** đặt cạnh mã băm **băm lại**, gốc Merkle
+đang lưu đặt cạnh gốc **dựng lại** từ danh sách `txid`, toàn bộ số dư tính lại từ chuỗi,
+và kết quả kiểm chữ ký của từng phiếu trong hàng chờ. Hai cột phải khớp nhau từng ký tự.
+
+---
+
+## 5. Đối chiếu với mã Python gốc của đồ án
 
 | Python | JavaScript | Ghi chú |
 |--------|-----------|---------|
@@ -122,7 +169,7 @@ phân hệ 02.
 
 ---
 
-## 5. Ghi chú kỹ thuật
+## 6. Ghi chú kỹ thuật
 
 **SHA-256 tự cài đặt.** Không dùng `crypto.subtle.digest()` vì API đó bất đồng bộ và chỉ
 chạy trong secure context, trong khi vòng lặp dò nonce cần một hàm băm đồng bộ, gọi được
@@ -146,13 +193,22 @@ và phần xuất PEM đã đối chiếu khớp từng byte với tiền tố D
 SubjectPublicKeyInfo cho secp256k1. Đây là mã phục vụ giảng dạy: không chống tấn công
 kênh kề, đừng dùng giữ tài sản thật.
 
+**Bộ chữ chọn theo tiêu chí đọc được, không theo tiêu chí lạ mắt.** Giao diện dùng
+**Inter**, chữ máy dùng **JetBrains Mono** — cả hai đều có bộ dấu tiếng Việt đầy đủ nên
+một câu tiếng Việt không bị rơi sang bộ chữ dự phòng ở giữa chừng (thủ phạm quen thuộc
+làm dòng chữ trông lệch và mờ). Trang cũng **không** đặt `-webkit-font-smoothing:
+antialiased`: trên Windows nó tắt khử răng cưa theo điểm ảnh phụ, làm nét chữ mảnh đi
+trông như bị nhoè. Mọi cỡ chữ đều từ 11px trở lên, khoảng giãn chữ của nhãn viết hoa
+được thu lại, và những hiệu ứng đổ bóng hay nháy độ mờ trên chữ đã được thay bằng hiệu
+ứng trên viền và nền.
+
 **Mỗi lần chuyển trang, thẻ `<main>` được dựng mới.** Các trang gắn sự kiện theo kiểu uỷ
 quyền lên chính thẻ chứa, nên nếu chỉ xoá nội dung bên trong thì trình xử lý cũ vẫn bám
 lại và một cú bấm sẽ chạy nhiều lần sau vài lượt qua lại.
 
 ---
 
-## 6. Triển khai lên Render
+## 7. Triển khai lên Render
 
 1. Đẩy thư mục `web/` lên một kho Git.
 2. Tạo **New → Web Service**, chọn kho vừa đẩy.
@@ -165,7 +221,7 @@ lại và một cú bấm sẽ chạy nhiều lần sau vài lượt qua lại.
 
 ---
 
-## 7. Tài liệu tham khảo
+## 8. Tài liệu tham khảo
 
 - Satoshi Nakamoto (2008). *Bitcoin: A Peer-to-Peer Electronic Cash System*.
 - Fabian Schär, Aleksander Berentsen. *Bitcoin, Blockchain and Cryptoassets*.

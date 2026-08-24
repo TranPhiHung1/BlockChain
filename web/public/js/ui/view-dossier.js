@@ -12,7 +12,8 @@
   var FILES = [
     ['js/lib/sha256.js', 1], ['js/core/linked-list.js', 2],
     ['js/core/blockchain.js', 3], ['js/core/ecdsa.js', 4],
-    ['js/core/consensus.js', 5],
+    ['js/core/consensus.js', 5], ['js/core/merkle.js', 9],
+    ['js/core/assistant.js', 10],
     ['js/i18n.js', 6], ['js/ui/*.js', 7], ['css/style.css', 8]
   ];
 
@@ -72,8 +73,8 @@
       '<div class="rows rows-3" style="margin-bottom:16px">' +
         BRIEF.map(function (k) {
           return '<div class="slab slab-plain">' +
-            '<b style="color:var(--blue-2);font-size:14.5px">' + d.esc(t('ds.b.' + k + 'h')) + '</b>' +
-            '<p style="font-size:13px;color:var(--txt-2);margin-top:8px">' +
+            '<b style="color:var(--blue-2);font-size:15px">' + d.esc(t('ds.b.' + k + 'h')) + '</b>' +
+            '<p style="font-size:13.5px;color:var(--txt-2);margin-top:8px">' +
                d.esc(t('ds.b.' + k + 'p')) + '</p>' +
           '</div>';
         }).join('') +
@@ -96,7 +97,7 @@
 
         '<div class="slab">' +
           '<div class="slab-bar"><h3>' + d.esc(t('ds.repo.t')) + '</h3></div>' +
-          '<p style="font-size:13px;color:var(--txt-2)">' + d.esc(t('ds.repo.p')) + '</p>' +
+          '<p style="font-size:13.5px;color:var(--txt-2)">' + d.esc(t('ds.repo.p')) + '</p>' +
           '<a class="act act-key" style="margin-top:16px" target="_blank" rel="noopener" ' +
              'href="' + d.esc(cfg.github.url) + '">' + d.esc(t('ds.repo.btn')) + '</a>' +
           '<div class="fld" style="margin-top:16px">' +
@@ -112,7 +113,7 @@
           '<span class="push"></span>' +
           '<span class="tag tag-a">' + cfg.team.length + ' ' + d.esc(t('ds.crew.unit')) + '</span>' +
         '</div>' +
-        '<p style="font-size:13px;color:var(--txt-2);margin-bottom:16px">' +
+        '<p style="font-size:13.5px;color:var(--txt-2);margin-bottom:16px">' +
           d.esc(t('ds.crew.p')) + '</p>' +
         '<div class="crew">' + cfg.team.map(whoCard).join('') + '</div>' +
       '</div>' +
@@ -121,16 +122,17 @@
       '<div class="rows rows-2" style="margin-bottom:16px">' +
         '<div class="slab">' +
           '<div class="slab-bar"><h3>' + d.esc(t('ds.path.t')) + '</h3></div>' +
-          '<p style="font-size:13.5px;color:var(--txt-2)">' + d.esc(t('ds.path.p')) + '</p>' +
-          '<ol style="font-size:13.5px;color:var(--txt-2);margin:14px 0 0 18px;display:grid;gap:8px">' +
+          '<p style="font-size:14px;color:var(--txt-2)">' + d.esc(t('ds.path.p')) + '</p>' +
+          '<ol style="font-size:14px;color:var(--txt-2);margin:14px 0 0 18px;display:grid;gap:8px">' +
             '<li>' + t('ds.path.1') + '</li>' +
             '<li>' + t('ds.path.2') + '</li>' +
             '<li>' + t('ds.path.3') + '</li>' +
+            '<li>' + t('ds.path.4') + '</li>' +
           '</ol>' +
         '</div>' +
         '<div class="slab">' +
           '<div class="slab-bar"><h3>' + d.esc(t('ds.port.t')) + '</h3></div>' +
-          '<p style="font-size:13.5px;color:var(--txt-2)">' + d.esc(t('ds.port.p')) + '</p>' +
+          '<p style="font-size:14px;color:var(--txt-2)">' + d.esc(t('ds.port.p')) + '</p>' +
           '<div class="tape" style="margin-top:12px;max-height:none">' +
             'LinkList.py           -> insert_First / insert_Last / Search / show\n' +
             'Block_BlockChain.py   -> compute_hash / add_Block / is_Valid / show\n' +
@@ -146,8 +148,8 @@
         '<div class="rows rows-4">' +
           [1, 2, 3, 4].map(function (i) {
             return '<div>' +
-              '<b style="color:var(--blue-2);font-size:14px">' + d.esc(t('ds.tech.' + i + 'h')) + '</b>' +
-              '<p style="font-size:12.5px;color:var(--txt-2);margin-top:6px">' +
+              '<b style="color:var(--blue-2);font-size:14.5px">' + d.esc(t('ds.tech.' + i + 'h')) + '</b>' +
+              '<p style="font-size:13px;color:var(--txt-2);margin-top:6px">' +
                  d.esc(t('ds.tech.' + i + 'p')) + '</p>' +
             '</div>';
           }).join('') +
@@ -171,7 +173,7 @@
       /* ---------- Tài liệu tham khảo ---------- */
       '<div class="slab">' +
         '<div class="slab-bar"><h3>' + d.esc(t('ds.ref.t')) + '</h3></div>' +
-        '<ul style="font-size:13.5px;color:var(--txt-2);margin-left:18px;display:grid;gap:9px">' +
+        '<ul style="font-size:14px;color:var(--txt-2);margin-left:18px;display:grid;gap:9px">' +
           [1, 2, 3, 4].map(function (i) {
             return '<li>' + t('ds.ref.' + i) + '</li>';
           }).join('') +

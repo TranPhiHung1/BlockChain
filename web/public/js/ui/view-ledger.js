@@ -61,7 +61,7 @@
       '<dl class="spec">' +
         '<dt>' + d.esc(t('lg.k.body')) + '</dt><dd><input class="edit" data-edit="' +
             i + '" value="' + d.esc(b.data) + '"></dd>' +
-        '<dt>' + d.esc(t('lg.k.stamp')) + '</dt><dd class="mono" style="font-size:12px">' +
+        '<dt>' + d.esc(t('lg.k.stamp')) + '</dt><dd class="mono" style="font-size:12.5px">' +
             d.esc(d.fmtTime(b.timestamp)) + '</dd>' +
         nonceRow +
         '<dt>' + d.esc(t('lg.k.prev')) + '</dt><dd class="digest' +
@@ -98,7 +98,7 @@
 
     d.$('#lgVerdict', root).innerHTML =
       '<div class="line" style="align-items:center;margin-bottom:10px">' +
-        '<span class="tag ' + (sound ? 'tag-ok' : 'tag-no') + '" style="font-size:12px;padding:5px 11px">' +
+        '<span class="tag ' + (sound ? 'tag-ok' : 'tag-no') + '" style="font-size:12.5px;padding:5px 11px">' +
           d.esc(sound ? t('lg.v.ok') : t('lg.v.no')) + '</span>' +
       '</div>' +
       '<div class="meter">' +
@@ -106,7 +106,7 @@
         '<div><b>' + num(broken) + '</b><span>' + d.esc(t('lg.v.broken')) + '</span></div>' +
         '<div><b>' + num(chain.difficulty) + '</b><span>' + d.esc(t('lg.v.diff')) + '</span></div>' +
       '</div>' +
-      '<p style="font-size:13px;color:var(--txt-2);margin-top:12px">' +
+      '<p style="font-size:13.5px;color:var(--txt-2);margin-top:12px">' +
         (sound ? t('lg.v.okTxt') : t('lg.v.noTxt', { n: broken })) + '</p>';
   }
 
@@ -244,10 +244,10 @@
           '<div class="fld" style="margin-top:16px">' +
             '<label for="lgDiff">' + d.esc(t('lg.diff')) + '</label>' +
             '<input id="lgDiff" type="range" min="0" max="5" step="1" value="0">' +
-            '<span class="mono" id="lgDiffVal" style="font-size:11.5px;color:var(--txt-2)"></span>' +
+            '<span class="mono" id="lgDiffVal" style="font-size:12.5px;color:var(--txt-2)"></span>' +
           '</div>' +
           '<div id="lgWork" class="tip hidden" style="margin-top:12px"></div>' +
-          '<div id="lgSay"  class="tip hidden" style="margin-top:12px;font-size:12.5px"></div>' +
+          '<div id="lgSay"  class="tip hidden" style="margin-top:12px;font-size:13px"></div>' +
         '</div>' +
 
         '<div class="slab">' +
@@ -266,8 +266,8 @@
         '<div class="rows rows-3">' +
           [1, 2, 3].map(function (i) {
             return '<div>' +
-              '<b style="color:var(--blue-2);font-size:14.5px">' + d.esc(t('lg.t' + i + 'h')) + '</b>' +
-              '<p style="font-size:13px;color:var(--txt-2);margin-top:6px">' + t('lg.t' + i + 'p') + '</p>' +
+              '<b style="color:var(--blue-2);font-size:15px">' + d.esc(t('lg.t' + i + 'h')) + '</b>' +
+              '<p style="font-size:13.5px;color:var(--txt-2);margin-top:6px">' + t('lg.t' + i + 'p') + '</p>' +
             '</div>';
           }).join('') +
         '</div>' +
